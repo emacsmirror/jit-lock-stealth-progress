@@ -107,15 +107,11 @@ With a customized mode-line it may be preferable to include
       (is-first
         (or
           (null (buffer-local-boundp 'jit-lock-stealth-progress-info this-progress-buffer))
-          (null (memq this-progress-buffer jit-lock-stealth-buffers))))
+          (null (memq this-progress-buffer jit-lock-stealth-buffers))
+          (null jit-lock-stealth-progress--min)
+          (null jit-lock-stealth-progress--max)))
       (did-font-lock-run nil)
       (do-mode-line-update nil))
-
-    (when is-first
-      (when jit-lock-stealth-progress-add-to-mode-line
-        (jit-lock-stealth-progress--mode-line-ensure))
-      (setq jit-lock-stealth-progress--min (point))
-      (setq jit-lock-stealth-progress--max (point)))
 
     (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now
       :around
@@ -124,6 +120,13 @@ With a customized mode-line it may be preferable to include
           ;; Stealthy font locking may update other buffers,
           ;; these aren't so useful to show in the mode-line.
           (when (eq this-progress-buffer (current-buffer))
+
+            (when is-first
+              (when jit-lock-stealth-progress-add-to-mode-line
+                (jit-lock-stealth-progress--mode-line-ensure))
+              (setq jit-lock-stealth-progress--min (point))
+              (setq jit-lock-stealth-progress--max (point)))
+
             (setq did-font-lock-run t)
             ;; When first is backwards, all points ahead of (point) have been calculated.
             (when (and is-first (< beg (point)))
@@ -142,7 +145,7 @@ With a customized mode-line it may be preferable to include
             (setq do-mode-line-update t))))
 
       (prog1 (apply orig-fn args)
-        (unless did-font-lock-run
+        (when (and (null is-first) (null did-font-lock-run))
           ;; Complete, clear the variable.
           (jit-lock-stealth-progress--clear-variables)
           (setq do-mode-line-update t))))
