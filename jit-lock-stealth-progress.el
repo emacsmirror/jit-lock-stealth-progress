@@ -158,11 +158,11 @@ With a customized mode-line it may be preferable to include
 ;; ---------------------------------------------------------------------------
 ;; Internal Mode Management
 
-(defun jit-lock-stealth-progress-mode-enable ()
+(defun jit-lock-stealth-progress--mode-enable ()
   "Turn on `jit-lock-stealth-progress-mode' for the current buffer."
   (advice-add 'jit-lock-stealth-fontify :around #'jit-lock-stealth-progress--fontify-wrapper))
 
-(defun jit-lock-stealth-progress-mode-disable ()
+(defun jit-lock-stealth-progress--mode-disable ()
   "Turn off `jit-lock-stealth-progress-mode' for the current buffer."
   (advice-remove 'jit-lock-stealth-fontify #'jit-lock-stealth-progress--fontify-wrapper)
 
@@ -179,9 +179,9 @@ With a customized mode-line it may be preferable to include
 
   (cond
     (jit-lock-stealth-progress-mode
-      (jit-lock-stealth-progress-mode-enable))
+      (jit-lock-stealth-progress--mode-enable))
     (t
-      (jit-lock-stealth-progress-mode-disable))))
+      (jit-lock-stealth-progress--mode-disable))))
 
 (provide 'jit-lock-stealth-progress)
 
