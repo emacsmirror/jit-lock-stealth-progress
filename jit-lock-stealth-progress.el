@@ -110,8 +110,7 @@ With a customized mode-line it may be preferable to include
       (did-font-lock-run nil)
       (do-mode-line-update nil))
 
-    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now
-      :around
+    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now :around
       (lambda (orig-fn-2 beg end)
         (prog1 (funcall orig-fn-2 beg end)
           ;; Stealthy font locking may update other buffers,
