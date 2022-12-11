@@ -82,9 +82,7 @@ With a customized mode-line it may be preferable to include
 (defun jit-lock-stealth-progress--mode-line-remove ()
   "Ensure the `mode-line-format' has progress display removed."
   (when (jit-lock-stealth-progress--mode-line-set-p)
-    (setq mode-line-format
-      (delete jit-lock-stealth-progress--mode-line-format
-        mode-line-format))))
+    (setq mode-line-format (delete jit-lock-stealth-progress--mode-line-format mode-line-format))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -110,8 +108,7 @@ With a customized mode-line it may be preferable to include
       (did-font-lock-run nil)
       (do-mode-line-update nil))
 
-    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now
-      :around
+    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now :around
       (lambda (orig-fn-2 beg end)
         (prog1 (funcall orig-fn-2 beg end)
           ;; Stealthy font locking may update other buffers,
@@ -128,9 +125,11 @@ With a customized mode-line it may be preferable to include
             (when (and is-first (< beg (point)))
               (setcdr jit-lock-stealth-progress--range-done (point-max)))
 
-            (setcar jit-lock-stealth-progress--range-done
+            (setcar
+              jit-lock-stealth-progress--range-done
               (min beg (car jit-lock-stealth-progress--range-done)))
-            (setcdr jit-lock-stealth-progress--range-done
+            (setcdr
+              jit-lock-stealth-progress--range-done
               (min (max end (cdr jit-lock-stealth-progress--range-done)) (point-max)))
             (let
               (
@@ -167,7 +166,8 @@ With a customized mode-line it may be preferable to include
   (advice-remove 'jit-lock-stealth-fontify #'jit-lock-stealth-progress--fontify-wrapper)
 
   (dolist (buf (buffer-list))
-    (with-current-buffer buf (jit-lock-stealth-progress--clear-variables))))
+    (with-current-buffer buf
+      (jit-lock-stealth-progress--clear-variables))))
 
 ;; ---------------------------------------------------------------------------
 ;; Public API
