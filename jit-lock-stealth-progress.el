@@ -82,9 +82,7 @@ With a customized mode-line it may be preferable to include
 (defun jit-lock-stealth-progress--mode-line-remove ()
   "Ensure the `mode-line-format' has progress display removed."
   (when (jit-lock-stealth-progress--mode-line-set-p)
-    (setq mode-line-format
-      (delete jit-lock-stealth-progress--mode-line-format
-        mode-line-format))))
+    (setq mode-line-format (delete jit-lock-stealth-progress--mode-line-format mode-line-format))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -127,9 +125,11 @@ With a customized mode-line it may be preferable to include
             (when (and is-first (< beg (point)))
               (setcdr jit-lock-stealth-progress--range-done (point-max)))
 
-            (setcar jit-lock-stealth-progress--range-done
+            (setcar
+              jit-lock-stealth-progress--range-done
               (min beg (car jit-lock-stealth-progress--range-done)))
-            (setcdr jit-lock-stealth-progress--range-done
+            (setcdr
+              jit-lock-stealth-progress--range-done
               (min (max end (cdr jit-lock-stealth-progress--range-done)) (point-max)))
             (let
               (
