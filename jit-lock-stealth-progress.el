@@ -17,7 +17,7 @@
 
 ;;; Usage
 
-;; (jit-lock-stealth-progress-mode) ;; Expose jit-lock-progress.
+;; (jit-lock-stealth-progress-mode) ; Expose jit-lock-progress.
 ;; This will show the value of `jit-lock-stealth-progress-info' in the mode-line.
 
 
@@ -56,13 +56,12 @@ With a customized mode-line it may be preferable to include
 (defmacro jit-lock-stealth-progress--with-advice (fn-orig where fn-advice &rest body)
   "Execute BODY with WHERE advice on FN-ORIG temporarily enabled."
   (declare (indent 3))
-  `
-  (let ((fn-advice-var ,fn-advice))
-    (unwind-protect
-      (progn
-        (advice-add ,fn-orig ,where fn-advice-var)
-        ,@body)
-      (advice-remove ,fn-orig fn-advice-var))))
+  `(let ((fn-advice-var ,fn-advice))
+     (unwind-protect
+         (progn
+           (advice-add ,fn-orig ,where fn-advice-var)
+           ,@body)
+       (advice-remove ,fn-orig fn-advice-var))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -70,15 +69,14 @@ With a customized mode-line it may be preferable to include
 
 (defsubst jit-lock-stealth-progress--mode-line-set-p ()
   "Return non-nil when `mode-line-format' includes progress."
-  (and
-    (listp mode-line-format)
-    (memq jit-lock-stealth-progress--mode-line-format mode-line-format)))
+  (and (listp mode-line-format)
+       (memq jit-lock-stealth-progress--mode-line-format mode-line-format)))
 
 (defun jit-lock-stealth-progress--mode-line-ensure ()
   "Ensure the `mode-line-format' includes progress display."
   (unless (jit-lock-stealth-progress--mode-line-set-p)
     (setq mode-line-format
-      (append mode-line-format (list jit-lock-stealth-progress--mode-line-format)))))
+          (append mode-line-format (list jit-lock-stealth-progress--mode-line-format)))))
 
 (defun jit-lock-stealth-progress--mode-line-remove ()
   "Ensure the `mode-line-format' has progress display removed."
@@ -98,51 +96,54 @@ With a customized mode-line it may be preferable to include
 
 (defun jit-lock-stealth-progress--fontify-wrapper (orig-fn &rest args)
   "Wrapper for `jit-lock-stealth-fontify' as (ORIG-FN ARGS) to set progress."
-  (let*
-    (
-      (this-progress-buffer (current-buffer))
-      (is-first
-        (or
-          (null (buffer-local-boundp 'jit-lock-stealth-progress-info this-progress-buffer))
-          (null (memq this-progress-buffer jit-lock-stealth-buffers))
-          (null jit-lock-stealth-progress--range-done)))
-      (did-font-lock-run nil)
-      (do-mode-line-update nil))
+  (let* ((this-progress-buffer (current-buffer))
+         (is-first
+          (or (null
+               (buffer-local-boundp 'jit-lock-stealth-progress-info this-progress-buffer))
+              (null (memq this-progress-buffer jit-lock-stealth-buffers))
+              (null jit-lock-stealth-progress--range-done)))
+         (did-font-lock-run nil)
+         (do-mode-line-update nil))
 
-    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now :around
-      (lambda (orig-fn-2 beg end)
-        (prog1 (funcall orig-fn-2 beg end)
-          ;; Stealthy font locking may update other buffers,
-          ;; these aren't so useful to show in the mode-line.
-          (when (eq this-progress-buffer (current-buffer))
+    (jit-lock-stealth-progress--with-advice 'jit-lock-fontify-now
+        :around
+        (lambda (orig-fn-2 beg end)
+          (prog1 (funcall orig-fn-2 beg end)
+            ;; Stealthy font locking may update other buffers,
+            ;; these aren't so useful to show in the mode-line.
+            (when (eq this-progress-buffer (current-buffer))
 
-            (when is-first
-              (when jit-lock-stealth-progress-add-to-mode-line
-                (jit-lock-stealth-progress--mode-line-ensure))
-              (setq jit-lock-stealth-progress--range-done (cons (point) (point))))
+              (when is-first
+                (when jit-lock-stealth-progress-add-to-mode-line
+                  (jit-lock-stealth-progress--mode-line-ensure))
+                (setq jit-lock-stealth-progress--range-done (cons (point) (point))))
 
-            (setq did-font-lock-run t)
-            ;; When first is backwards, all points ahead of (point) have been calculated.
-            (when (and is-first (< beg (point)))
-              (setcdr jit-lock-stealth-progress--range-done (point-max)))
+              (setq did-font-lock-run t)
+              ;; When first is backwards, all points ahead of (point) have been calculated.
+              (when (and is-first (< beg (point)))
+                (setcdr jit-lock-stealth-progress--range-done (point-max)))
 
-            (setcar
-              jit-lock-stealth-progress--range-done
-              (min beg (car jit-lock-stealth-progress--range-done)))
-            (setcdr
-              jit-lock-stealth-progress--range-done
-              (min (max end (cdr jit-lock-stealth-progress--range-done)) (point-max)))
-            (let
-              (
-                (range-full (- (point-max) (point-min)))
-                (range-done
-                  (-
-                    (cdr jit-lock-stealth-progress--range-done)
-                    (car jit-lock-stealth-progress--range-done))))
-              (let ((progress (* 100.0 (- 1.0 (/ (float (- range-full range-done)) range-full)))))
-                (setq-local jit-lock-stealth-progress-info
-                  (format jit-lock-stealth-progress-info-format progress))))
-            (setq do-mode-line-update t))))
+              (setcar
+               jit-lock-stealth-progress--range-done
+               (min beg (car jit-lock-stealth-progress--range-done)))
+              (setcdr
+               jit-lock-stealth-progress--range-done
+               (min (max end (cdr jit-lock-stealth-progress--range-done)) (point-max)))
+              (let ((range-full (- (point-max) (point-min)))
+                    (range-done
+                     (-
+                      (cdr jit-lock-stealth-progress--range-done)
+                      (car jit-lock-stealth-progress--range-done))))
+                (let ((progress
+                       (* 100.0
+                          (- 1.0
+                             (/ (float
+                                 (- range-full range-done))
+                                range-full)))))
+                  (setq-local
+                   jit-lock-stealth-progress-info
+                   (format jit-lock-stealth-progress-info-format progress))))
+              (setq do-mode-line-update t))))
 
       (prog1 (apply orig-fn args)
         (when (and (null is-first) (null did-font-lock-run))
@@ -179,10 +180,10 @@ With a customized mode-line it may be preferable to include
   :global t
 
   (cond
-    (jit-lock-stealth-progress-mode
-      (jit-lock-stealth-progress--mode-enable))
-    (t
-      (jit-lock-stealth-progress--mode-disable))))
+   (jit-lock-stealth-progress-mode
+    (jit-lock-stealth-progress--mode-enable))
+   (t
+    (jit-lock-stealth-progress--mode-disable))))
 
 (provide 'jit-lock-stealth-progress)
 
