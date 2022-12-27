@@ -55,6 +55,7 @@ With a customized mode-line it may be preferable to include
 
 (defmacro jit-lock-stealth-progress--with-advice (fn-orig where fn-advice &rest body)
   "Execute BODY with WHERE advice on FN-ORIG temporarily enabled."
+  (declare (indent 3))
   `
   (let ((fn-advice-var ,fn-advice))
     (unwind-protect
