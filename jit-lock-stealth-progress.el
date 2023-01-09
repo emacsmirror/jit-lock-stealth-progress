@@ -186,5 +186,8 @@ With a customized mode-line it may be preferable to include
     (jit-lock-stealth-progress--mode-disable))))
 
 (provide 'jit-lock-stealth-progress)
-
+;; Local Variables:
+;; fill-column: 99
+;; indent-tabs-mode: nil
+;; End:
 ;;; jit-lock-stealth-progress.el ends here
