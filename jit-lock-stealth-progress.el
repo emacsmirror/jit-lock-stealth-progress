@@ -130,9 +130,8 @@ With a customized mode-line it may be preferable to include
                (min (max end (cdr jit-lock-stealth-progress--range-done)) (point-max)))
               (let ((range-full (- (point-max) (point-min)))
                     (range-done
-                     (-
-                      (cdr jit-lock-stealth-progress--range-done)
-                      (car jit-lock-stealth-progress--range-done))))
+                     (- (cdr jit-lock-stealth-progress--range-done)
+                        (car jit-lock-stealth-progress--range-done))))
                 (let ((progress
                        (* 100.0 (- 1.0 (/ (float (- range-full range-done)) range-full)))))
                   (setq-local jit-lock-stealth-progress-info
