@@ -70,17 +70,20 @@ With a customized mode-line it may be preferable to include
 
 (defsubst jit-lock-stealth-progress--mode-line-set-p ()
   "Return non-nil when `mode-line-format' includes progress."
+  (declare (important-return-value t))
   (and (listp mode-line-format)
        (memq jit-lock-stealth-progress--mode-line-format mode-line-format)))
 
 (defun jit-lock-stealth-progress--mode-line-ensure ()
   "Ensure the `mode-line-format' includes progress display."
+  (declare (important-return-value nil))
   (unless (jit-lock-stealth-progress--mode-line-set-p)
     (setq mode-line-format
           (append mode-line-format (list jit-lock-stealth-progress--mode-line-format)))))
 
 (defun jit-lock-stealth-progress--mode-line-remove ()
   "Ensure the `mode-line-format' has progress display removed."
+  (declare (important-return-value nil))
   (when (jit-lock-stealth-progress--mode-line-set-p)
     (setq mode-line-format (delete jit-lock-stealth-progress--mode-line-format mode-line-format))))
 
@@ -90,6 +93,7 @@ With a customized mode-line it may be preferable to include
 
 (defun jit-lock-stealth-progress--clear-variables ()
   "Clear all buffer-local variables."
+  (declare (important-return-value nil))
   (when jit-lock-stealth-progress-add-to-mode-line
     (jit-lock-stealth-progress--mode-line-remove))
   (kill-local-variable 'jit-lock-stealth-progress-info)
@@ -97,6 +101,7 @@ With a customized mode-line it may be preferable to include
 
 (defun jit-lock-stealth-progress--fontify-wrapper (orig-fn &rest args)
   "Wrapper for `jit-lock-stealth-fontify' as (ORIG-FN ARGS) to set progress."
+  (declare (important-return-value nil))
   (let* ((this-progress-buffer (current-buffer))
          (is-first
           (or (null (buffer-local-boundp 'jit-lock-stealth-progress-info this-progress-buffer))
@@ -155,10 +160,12 @@ With a customized mode-line it may be preferable to include
 
 (defun jit-lock-stealth-progress--mode-enable ()
   "Turn on `jit-lock-stealth-progress-mode' for the current buffer."
+  (declare (important-return-value nil))
   (advice-add 'jit-lock-stealth-fontify :around #'jit-lock-stealth-progress--fontify-wrapper))
 
 (defun jit-lock-stealth-progress--mode-disable ()
   "Turn off `jit-lock-stealth-progress-mode' for the current buffer."
+  (declare (important-return-value nil))
   (advice-remove 'jit-lock-stealth-fontify #'jit-lock-stealth-progress--fontify-wrapper)
 
   (dolist (buf (buffer-list))
